@@ -1,7 +1,9 @@
 /* global NAF, io */
 
-debugger
-alert("USING")
+console.error("USING CUSTOM EXPERIMENTAL NETWORKED AFRAME WEBRTC ADAPTER")
+console.error("USING CUSTOM EXPERIMENTAL NETWORKED AFRAME WEBRTC ADAPTER")
+console.error("USING CUSTOM EXPERIMENTAL NETWORKED AFRAME WEBRTC ADAPTER")
+console.error("USING CUSTOM EXPERIMENTAL NETWORKED AFRAME WEBRTC ADAPTER")
 
 class WebRtcPeer {
     constructor(localId, remoteId, sendSignalFunc) {
