@@ -1,6 +1,6 @@
 /* global NAF, io */
 
-console.error("USING CUSTOM EXPERIMENTAL NETWORKED AFRAME WEBRTC ADAPTER")
+console.error("USING CUSTOM EXPERIMENTAL NETWORKED AFRAME WEBRTC ADAPTER *1")
 console.error("USING CUSTOM EXPERIMENTAL NETWORKED AFRAME WEBRTC ADAPTER")
 console.error("USING CUSTOM EXPERIMENTAL NETWORKED AFRAME WEBRTC ADAPTER")
 console.error("USING CUSTOM EXPERIMENTAL NETWORKED AFRAME WEBRTC ADAPTER")
@@ -34,9 +34,13 @@ class WebRtcPeer {
       // If there are errors with Safari implement this:
       // https://github.com/OpenVidu/openvidu/blob/master/openvidu-browser/src/OpenViduInternal/WebRtcPeer/WebRtcPeer.ts#L154
       
+      console.warn(`options.sendAudio ${options.sendAudio} options.sendVideo ${options.sendVideo}`)
       if (options.sendAudio || options.sendVideo) {
         options.localAVStream.getTracks().forEach(
-          track => self.pc.addTrack(track, options.localAVStream));
+          track => {
+            console.warn("ADDING TRACK", track)
+            return self.pc.addTrack(track, options.localAVStream)
+          });
       }
   
       this.pc.createOffer(
@@ -368,6 +372,7 @@ class WebRtcPeer {
           self.myRoomJoinTime = joinedTime;
           NAF.log.write("Successfully joined room", self.room, "at server time", joinedTime);
     
+          console.warn(`self.sendAudio ${self.sendAudio} self.sendVideo ${self.sendVideo}`)
           if (self.sendAudio || self.sendVideo) {
             const mediaConstraints = {
               audio: self.sendAudio,
@@ -375,10 +380,12 @@ class WebRtcPeer {
             };
             navigator.mediaDevices.getUserMedia(mediaConstraints)
             .then(localStream => {
+              console.log("got local stream", localStream)
               self.storeAVStream(self.myId, localStream);
               self.connectSuccess(self.myId);
               localStream.getTracks().forEach(
                 track => {
+                  console.log("adding local tracks", track)
                   Object.keys(self.peers).forEach(peerId => { 
                   self.peers[peerId].pc.addTrack(track, localStream) 
                 })
@@ -392,6 +399,7 @@ class WebRtcPeer {
               self.connectSuccess(self.myId);
             });
           } else {
+            console.warn(`no audio/video`)
             self.connectSuccess(self.myId);
           }
         });
@@ -564,6 +572,7 @@ class WebRtcPeer {
     }
 
     streamVideoToScreen(stream) {
+      console.error("ATTEMPTING STREAM", stream)
       // experimental video support
 
       this.screen = document.getElementById('#webrtc-screen');
