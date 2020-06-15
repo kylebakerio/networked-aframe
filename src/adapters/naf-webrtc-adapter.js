@@ -291,21 +291,6 @@ class WebRtcPeer {
   
       this.avStreams = {};
 
-      // experimental video support
-      this.screen = document.getElementById('#webrtc-screen');
-      let screen = this.screen;
-      screen.onloadedmetadata = () => {
-        console.log(`Remote video videoWidth: ${this.videoWidth}px,  videoHeight: ${this.videoHeight}px`);
-      };
-
-      this.screen.onresize = () => {
-        console.log(`Remote video size changed to ${screen.videoWidth}x${screen.videoHeight}`);
-        // We'll use the first onresize callback as an indication that
-        // video has started playing out.
-      };
-
-      // end experimental video support
-
       this.penderingAVrequest = {};
   
       this.serverTimeRequests = 0;
@@ -579,8 +564,23 @@ class WebRtcPeer {
     }
 
     streamVideoToScreen(stream) {
-      if (this.screen.srcObject !== stream) {
-        this.screen.srcObject = stream;
+      // experimental video support
+
+      this.screen = document.getElementById('#webrtc-screen');
+      let screen = this.screen;
+
+      screen.onloadedmetadata = () => {
+        console.log(`Remote video videoWidth: ${this.videoWidth}px,  videoHeight: ${this.videoHeight}px`);
+      };
+
+      screen.onresize = () => {
+        console.log(`Remote video size changed to ${screen.videoWidth}x${screen.videoHeight}`);
+        // We'll use the first onresize callback as an indication that
+        // video has started playing out.
+      };
+
+      if (screen.srcObject !== stream) {
+        screen.srcObject = stream;
         console.log('attempting to set stream as screen src', stream);
       }
     }
