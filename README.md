@@ -1,3 +1,89 @@
+Why Fork this?
+=======
+
+Because I liked a lot about (the idea of) Networked A-Frame and needed to use it, but also needed webrtc video. This is currently pre-alpha, purely proof of concept, didn't want to waste time making the code pretty before I verified it was feasible in scope. I wouldn't publish this, except that I spent many hours trying to find pre-documented solutions for this and found that this was a pretty rough corner of the web. I pushed up mostly to have a convenient way to access my changes as I experimented (had to fork and build on every change because of repo design). I'm leaving this here at the moment in case it helps someone else later. I may improve it and do a pull request, but we all know how projects like this are, so just in case I don't get back to it, here's it documented in its current state.
+
+<img src="https://i.imgur.com/8pR4OA0.gif" title="showing phone camera and laptop webcame facing each other, from computer screen recording seeing a screen that displays phone video feed.">
+
+<i>showing phone camera and laptop webcame facing each other, from computer screen recording seeing a screen that displays phone video feed.</i>
+
+As of this writing (see file update on github), I have this enabled. It's crude, but works either one way or, when lucky, both ways. You just set 'video' to 'true' on the scene properties (alongside where you can set 'audio:true' normally in NAF), so:
+
+```js
+<a-scene id="scene" networked-scene="
+      app: myApp;
+      room: room1;
+      debug: true;
+      video: true;
+      audio: true;
+      adapter: webrtc;
+    ">
+```
+
+then add an HTML5 `<video id="webrtc-screen" playsinline autoplay></video>` element in the `<a-assets>` section of your index with the id (no source, that is dynamically set later), and then somewhere in your scene add
+
+```
+<a-plane position="0 0 0" rotation="0 0 0" width=".35" height=".35" material="src: #webrtc-screen; side: double"></a-plane>
+```
+
+
+To transmit video (and/or enable seeing your own video), I currently add this to a script tag at the bottom of the index.html:
+
+```
+function checkConnected() {
+    console.log("will promise")
+    return new Promise((resolve, reject) => {
+      let wait100 = function() {
+        setTimeout(() => {
+          console.log("waited 100")
+          if (NAF.connection.isConnected()) {
+            resolve(NAF.connection)
+          }
+          else wait100()
+        }, 100)
+      }
+      wait100()
+    })
+  }
+
+  checkConnected()
+  .then(c => {
+    let others = c.getConnectedClients()
+    console.error('connected', others, Object.keys(others).length);
+    
+    navigator.mediaDevices.getUserMedia({audio: false, video: true})
+    .then(stream => {
+      let $video = document.querySelector('#webcam-screen')
+      $video.srcObject = stream
+      $video.onloadedmetadata = () => {
+        $video.play()
+      }
+    })
+  })
+```
+
+To see your own webcam feed, add this to the scene:
+```
+<a-plane position=".6 1.187 -.178" rotation="0 90 0" width=".35" height=".35" material="src: #webcam-screen; side: double"></a-plane>
+```
+
+And that's it, the rest is all 'normal'. I have a bunch of messy console logs in there from me debugging and trying to figure out how the code worked as I hacked on it, those may help you if you're trying to improve it.
+
+My current project as of this writing is up on vrgo.herokuapp.com, will be moved to my own domain later at some point (used to be vrgo.kylebaker.io, and probably will be again later, but currently that's a client-side-only implementation from a few days ago; in the future, if this goes all the way, it will probably just get its own domain).
+
+TO USE THIS FORK,
+
+just include this in place of NAF:
+
+To get exactly the version I have running as I write this:
+`<script src="https://gitcdn.xyz/cdn/kylebakerio/networked-aframe/37d2572a05615bab2a9aaaad11a406dd0d66b650/dist/networked-aframe.js"></script>`
+
+To get my latest commit (in theory should be best):
+`<script src="https://raw.githack.com/kylebakerio/networked-aframe/master/dist/networked-aframe.js"></script>`
+
+
+
+
 <img src="http://i.imgur.com/7ddbE0q.gif" width="300">
 
 
