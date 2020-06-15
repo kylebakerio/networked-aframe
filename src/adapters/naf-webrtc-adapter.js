@@ -575,7 +575,7 @@ class WebRtcPeer {
       console.error("ATTEMPTING STREAM", stream)
       // experimental video support
 
-      this.screen = document.getElementById('#webrtc-screen');
+      this.screen = document.getElementById('webrtc-screen');
       let screen = this.screen;
 
       screen.onloadedmetadata = () => {
