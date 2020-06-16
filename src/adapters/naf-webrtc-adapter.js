@@ -388,10 +388,11 @@ class WebRtcPeer {
               console.log("got local stream", localStream)
               self.storeAVStream(self.myId, localStream);
               self.connectSuccess(self.myId);
+              console.log("adding local track to stream on socket connectsuccess, this is likely the failure", self)
               localStream.getTracks().forEach(
                 track => {
-                  console.log("adding local track to stream on socket connectsuccess", track)
                   Object.keys(self.peers).forEach(peerId => { 
+                    console.log("problem is likely here... addTrack to", peerId, track, localStream)
                     self.peers[peerId].pc.addTrack(track, localStream) 
                   })
                 }
