@@ -81,6 +81,7 @@ class NetworkConnection {
   }
 
   occupantsReceived(occupantList) {
+    console.warn("occupants received, will check for connecting clients")
     var prevConnectedClients = Object.assign({}, this.connectedClients);
     this.connectedClients = occupantList;
     this.checkForDisconnectingClients(prevConnectedClients, occupantList);
@@ -99,11 +100,14 @@ class NetworkConnection {
 
   // Some adapters will handle this internally
   checkForConnectingClients(occupantList) {
+    console.warn("deciding to startStreamConnection, will for", occupantList)
     for (var id in occupantList) {
       var startConnection = this.isNewClient(id) && this.adapter.shouldStartConnectionTo(occupantList[id]);
       if (startConnection) {
-        NAF.log.write('Opening datachannel to ', id);
+        NAF.log.write('Opening data channel to ', id);
         this.adapter.startStreamConnection(id);
+      } else {
+        console.warn("WILL NOT START CONNECTION", this.isNewClient(id), this.adapter.shouldStartConnectionTo(occupantList[id]))
       }
     }
   }
@@ -121,6 +125,7 @@ class NetworkConnection {
   }
 
   isNewClient(clientId) {
+    console.log(`${clientId} ${!this.isConnectedTo(clientId) ? "is" : "is not"} a new client`)
     return !this.isConnectedTo(clientId);
   }
 

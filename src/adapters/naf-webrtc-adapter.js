@@ -25,6 +25,7 @@ class WebRtcPeer {
     }
   
     offer(options) {
+      console.log("will offer", options)
       const self = this;
       // reliable: false - UDP
       this.setupChannel(
@@ -38,9 +39,10 @@ class WebRtcPeer {
       if (options.sendAudio || options.sendVideo) {
         options.localAVStream.getTracks().forEach(
           track => {
-            console.warn("ADDING TRACK", track)
+            console.warn("ADDING LOCAL TRACK FOR OFFER", track)
             return self.pc.addTrack(track, options.localAVStream)
-          });
+          }
+        );
       }
   
       this.pc.createOffer(
@@ -385,11 +387,12 @@ class WebRtcPeer {
               self.connectSuccess(self.myId);
               localStream.getTracks().forEach(
                 track => {
-                  console.log("adding local tracks", track)
+                  console.log("adding local tracks to stream", track)
                   Object.keys(self.peers).forEach(peerId => { 
-                  self.peers[peerId].pc.addTrack(track, localStream) 
-                })
-              })
+                    self.peers[peerId].pc.addTrack(track, localStream) 
+                  })
+                }
+              )
             })
             .catch(e => {
               NAF.log.error(e);
@@ -398,7 +401,8 @@ class WebRtcPeer {
               self.sendVideo = false;
               self.connectSuccess(self.myId);
             });
-          } else {
+          }
+          else {
             console.warn(`no audio/video`)
             self.connectSuccess(self.myId);
           }
@@ -475,11 +479,13 @@ class WebRtcPeer {
     }
   
     shouldStartConnectionTo(client) {
+      console.log(`we ${(this.myRoomJoinTime || 0) <= (client || 0) ? "should" : "should not"} start a connection to ${client}`)
+      console.log(this.myRoomJoinTime, client)
       return (this.myRoomJoinTime || 0) <= (client || 0);
     }
   
     startStreamConnection(remoteId) {
-      NAF.log.write('starting offer process');
+      NAF.log.write('starting offer process', remoteId);
   
       if (this.sendAudio || this.sendVideo) {
         this.getMediaStream(this.myId)
@@ -572,7 +578,7 @@ class WebRtcPeer {
     }
 
     streamVideoToScreen(stream) {
-      console.error("ATTEMPTING STREAM", stream)
+      console.error("ATTEMPTING STREAM TO SCREEN", stream)
       // experimental video support
 
       this.screen = document.getElementById('webrtc-screen');
