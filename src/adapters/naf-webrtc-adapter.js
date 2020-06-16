@@ -297,11 +297,14 @@ class WebRtcPeer {
   
       this.avStreams = {};
 
-      this.penderingAVrequest = {};
+      this.pendingStreamRequest = {};
   
       this.serverTimeRequests = 0;
       this.timeOffsets = [];
       this.avgTimeOffset = 0;
+
+      window.webrtcinstance = this;
+      console.log("webrtc init window.webrtcinstance", window.webrtcinstance)
     }
   
     setServerUrl(wsUrl) {
@@ -387,7 +390,7 @@ class WebRtcPeer {
               self.connectSuccess(self.myId);
               localStream.getTracks().forEach(
                 track => {
-                  console.log("adding local tracks to stream", track)
+                  console.log("adding local track to stream on socket connectsuccess", track)
                   Object.keys(self.peers).forEach(peerId => { 
                     self.peers[peerId].pc.addTrack(track, localStream) 
                   })
@@ -563,14 +566,18 @@ class WebRtcPeer {
   
     storeAVStream(clientId, stream) {
       this.avStreams[clientId] = stream;
-      if (this.penderingAVrequest[clientId]) {
-        NAF.log.write("Received pending audio + video for " + clientId);
-        this.penderingAVrequest[clientId](stream);
-        delete this.penderingAVrequest[clientId](stream);
+      if (this.pendingStreamRequest[clientId]) {
+        NAF.log.write("Received pending audio + video for " + clientId + " resolving with it, should cause attachment to dom");
+        this.pendingStreamRequest[clientId](stream);
+        delete this.pendingStreamRequest[clientId](stream); // <-- calling the resolve a second time, as we delete the output of calling resolve....?
+      }
+      else {
+        console.warn("No pendingStreamRequest...", clientId, stream)
       }
     }
   
     trackListener(clientId, stream) {
+      console.warn("storing stream!", clientId, stream)
       this.storeAVStream(clientId, stream);
 
       // experimental video support:
@@ -601,14 +608,23 @@ class WebRtcPeer {
     // }
   
     getMediaStream(clientId) {
+      // this is called externally by networkedaudiosource 
+      // it's also called within this file to get our own stream to send it
+      // during an offer
       const self = this;
       if (this.avStreams[clientId]) {
-        NAF.log.write("Already had audio/video for " + clientId);
+        NAF.log.write("Already had audio/video for " + clientId + ", will attach it");
         return Promise.resolve(this.avStreams[clientId]);
       } else {
-        NAF.log.write("Waiting on audio/video for " + clientId);
+        NAF.log.write("Waiting on audio/video for " + clientId + ", will promise it...");
+        let waiting = setInterval(x=>console.log("...still waiting"), 7000);
         return new Promise(resolve => {
-          self.penderingAVrequest[clientId] = resolve;
+          let resolveWrapper = () => {
+            clearInterval(waiting)
+            console.log("finally got it for ", clientId)
+            resolve()
+          };
+          self.pendingStreamRequest[clientId] = resolveWrapper;
         });
       }
     }

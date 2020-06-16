@@ -1,7 +1,7 @@
 /* global AFRAME, NAF, THREE */
 var naf = require('../NafIndex');
 
-AFRAME.registerComponent('networked-audio-source', {
+AFRAME.registerComponent('networked-video-source', {
   schema: {
     positional: { default: true },
     distanceModel: {
@@ -14,7 +14,7 @@ AFRAME.registerComponent('networked-audio-source', {
   },
 
   init: function () {
-    console.warn('init networked-audio-source')
+    console.warn('init networked-video-source | THIS IS INCOMPLETE')
     this.listener = null;
     this.stream = null;
 
@@ -25,9 +25,10 @@ AFRAME.registerComponent('networked-audio-source', {
 
       if (ownerId) {
         NAF.connection.adapter.getMediaStream(ownerId)
-          .then(this._setMediaStream)
+          .then(stream => this._setMediaStream(stream, ownerId))
           .catch((e) => naf.log.error(`Error getting media stream for ${ownerId}`, e));
       } else {
+        console.warn("it's a local entity, not a networked one, so won't attach stream to it")
         // Correctly configured local entity, perhaps do something here for enabling debug audio loopback
       }
     });
@@ -45,11 +46,11 @@ AFRAME.registerComponent('networked-audio-source', {
     let screen = this.screen;
 
     screen.onloadedmetadata = () => {
-      console.log(`Remote video videoWidth: ${this.videoWidth}px,  videoHeight: ${this.videoHeight}px`);
+      console.log(`Remote video videoWidth: ${this.screen.videoWidth}px,  videoHeight: ${this.screen.videoHeight}px`);
     };
 
     screen.onresize = () => {
-      console.log(`Remote video size changed to ${this.videoWidth}x${this.videoHeight}`);
+      console.log(`Remote video size changed to ${this.screen.videoWidth}x${this.screen.videoHeight}`);
       // We'll use the first onresize callback as an indication that
       // video has started playing out.
     };
@@ -64,6 +65,9 @@ AFRAME.registerComponent('networked-audio-source', {
     console.warn("SET MEDIA STREAM")
     if(!this.sound) {
       this.setupSound();
+    }
+    if (!this.videoEl) {
+      this.setupVideo();
     }
 
     if(newStream != this.stream) {
@@ -110,6 +114,11 @@ AFRAME.registerComponent('networked-audio-source', {
     if (this.stream) {
       this.sound.disconnect();
     }
+  },
+
+  setupVideo: function(ownerId) {
+    var video = document.createElement("video");
+    video.setAttribute("id", 'webrtc-screen-ownerId');
   },
 
   setupSound: function() {
