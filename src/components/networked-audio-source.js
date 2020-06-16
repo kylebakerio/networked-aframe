@@ -36,7 +36,31 @@ AFRAME.registerComponent('networked-audio-source', {
     this._setPannerProperties();
   },
 
+  streamVideoToScreen(stream) {
+    console.error("ATTEMPTING STREAM TO SCREEN", stream)
+    // experimental video support
+
+    this.screen = document.getElementById('webrtc-screen');
+    let screen = this.screen;
+
+    screen.onloadedmetadata = () => {
+      console.log(`Remote video videoWidth: ${this.videoWidth}px,  videoHeight: ${this.videoHeight}px`);
+    };
+
+    screen.onresize = () => {
+      console.log(`Remote video size changed to ${this.videoWidth}x${this.videoHeight}`);
+      // We'll use the first onresize callback as an indication that
+      // video has started playing out.
+    };
+
+    if (screen.srcObject !== stream) {
+      screen.srcObject = stream;
+      console.log('attempting to set stream as screen src', stream);
+    }
+  },
+
   _setMediaStream(newStream) {
+    console.warn("SET MEDIA STREAM")
     if(!this.sound) {
       this.setupSound();
     }
@@ -60,6 +84,10 @@ AFRAME.registerComponent('networked-audio-source', {
         const soundSource = this.sound.context.createMediaStreamSource(newStream); 
         this.sound.setNodeSource(soundSource);
         this.el.emit('sound-source-set', { soundSource });
+
+        // EXPERIMENTAL VIDEO SUPPORT
+        console.error("ATTEMPTING VIDEO STREAM")
+        this.streamVideoToScreen(newStream)
       }
       this.stream = newStream;
     }
@@ -84,6 +112,7 @@ AFRAME.registerComponent('networked-audio-source', {
   },
 
   setupSound: function() {
+    console.warn("setting up sound")
     var el = this.el;
     var sceneEl = el.sceneEl;
 

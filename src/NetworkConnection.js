@@ -102,10 +102,10 @@ class NetworkConnection {
   checkForConnectingClients(occupantList) {
     console.warn("deciding to startStreamConnection, will for", occupantList)
     for (var id in occupantList) {
-      var startConnection = this.isNewClient(id) /* && this.adapter.shouldStartConnectionTo(occupantList[id])*/;
-      if (!this.adapter.shouldStartConnectionTo(occupantList[id])) {
+      var startConnection = this.isNewClient(id) && this.adapter.shouldStartConnectionTo(occupantList[id]);
+      /* if (!this.adapter.shouldStartConnectionTo(occupantList[id])) {
         console.error("BYPASSING THIS (SEEMS TO ONLY ALLOW LATER CLIENTS TO HAVE STREAM) BUT IF YOU HAVE PROBLEMS, MIGHT LOOK HERE... NORMALLY IT WOULD HAVE PREVENTED THIS CONNECTION BEFORE")
-      }
+      } */
       if (startConnection) {
         NAF.log.write('Opening data channel to ', id);
         this.adapter.startStreamConnection(id);
