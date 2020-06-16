@@ -45,13 +45,26 @@ AFRAME.registerComponent('networked-video-source', {
     this.screen = document.getElementById('webrtc-screen');
     let screen = this.screen;
 
+    /*
+
+    const leftVideo = document.getElementById('leftVideo');
+const rightVideo = document.getElementById('rightVideo');
+
+ console.log(`Remote video videoWidth: ${this.videoWidth}px,  videoHeight: ${this.videoHeight}px`);
+};
+
+rightVideo.onresize = () => {
+  console.log(`Remote video size changed to ${rightVideo.videoWidth}x${rightVideo.videoHeight}`);
+
+  */
+
     screen.onloadedmetadata = () => {
-      console.log(`Remote video videoWidth: ${this.screen.videoWidth}px,  videoHeight: ${this.screen.videoHeight}px`);
+      console.log(`Remote video videoWidth: ${screen.videoWidth}px,  videoHeight: ${screen.videoHeight}px`);
     };
 
     screen.onresize = () => {
-      console.log(`Remote video size changed to ${this.screen.videoWidth}x${this.screen.videoHeight}`);
-      // We'll use the first onresize callback as an indication that
+      console.log(`Remote video size changed to ${screen.videoWidth}x${screen.videoHeight}`);
+      // We can use the first onresize callback as an indication that
       // video has started playing out.
     };
 

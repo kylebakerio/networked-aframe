@@ -81,7 +81,7 @@ To get exactly the version I have running as I write this:
 To get my latest commit (in theory should be best):
 `<script src="https://raw.githack.com/kylebakerio/networked-aframe/master/dist/networked-aframe.js"></script>`
 
-
+(note: some updates have been made, in the process of making a 'networked-video-source' that mirrors the 'networked-audio-source' component; it is now required that you add 'networked-audio-source' to get it working and feed sent out to the video element as of this writing.)
 
 
 <img src="http://i.imgur.com/7ddbE0q.gif" width="300">
