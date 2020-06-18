@@ -4,6 +4,8 @@ console.error("USING CUSTOM EXPERIMENTAL NETWORKED AFRAME WEBRTC ADAPTER *1")
 console.error("USING CUSTOM EXPERIMENTAL NETWORKED AFRAME WEBRTC ADAPTER")
 console.error("USING CUSTOM EXPERIMENTAL NETWORKED AFRAME WEBRTC ADAPTER")
 console.error("USING CUSTOM EXPERIMENTAL NETWORKED AFRAME WEBRTC ADAPTER")
+console.log("try window.getMyrtcpc,  window.getRTCpeers, window.rtcAdapterInstance")
+
 
 class WebRtcPeer {
     constructor(localId, remoteId, sendSignalFunc) {
@@ -15,6 +17,9 @@ class WebRtcPeer {
   
       this.pc = this.createPeerConnection();
       this.channel = null;
+
+      //debugging
+      window.getMyrtcpc = function() { return this.pc }
     }
   
     setDatachannelListeners(openListener, closedListener, messageListener, trackListener) {
@@ -23,6 +28,7 @@ class WebRtcPeer {
       this.messageListener = messageListener;
       this.trackListener = trackListener;
     }
+
   
     offer(options) {
       console.log("will offer", options)
@@ -36,10 +42,12 @@ class WebRtcPeer {
       // https://github.com/OpenVidu/openvidu/blob/master/openvidu-browser/src/OpenViduInternal/WebRtcPeer/WebRtcPeer.ts#L154
       
       console.warn(`options.sendAudio ${options.sendAudio} options.sendVideo ${options.sendVideo}`)
-      if (options.sendAudio || options.sendVideo) {
+      if (!this.haveAddedOwnStreamTracks && (options.sendAudio || options.sendVideo)) {
         options.localAVStream.getTracks().forEach(
           track => {
-            console.warn("ADDING LOCAL TRACK FOR OFFER", track)
+            console.warn("ADDING LOCAL TRACK FOR OFFER", track, self.pc, "error here happens when we try to add our own track multiple times it seems...")
+
+            this.haveAddedOwnStreamTracks = true;
             return self.pc.addTrack(track, options.localAVStream)
           }
         );
@@ -294,17 +302,18 @@ class WebRtcPeer {
   
       this.peers = {}; // id -> WebRtcPeer
       this.occupants = {}; // id -> joinTimestamp
-  
+      
       this.avStreams = {};
-
+      
       this.pendingStreamRequest = {};
-  
+      
       this.serverTimeRequests = 0;
       this.timeOffsets = [];
       this.avgTimeOffset = 0;
-
-      window.webrtcinstance = this;
-      console.log("webrtc init window.webrtcinstance", window.webrtcinstance)
+      
+      window.getRTCpeers = function() { return this.peers }
+      window.rtcAdapterInstance = this;
+      console.log("webrtc init window.webrtcinstance", window.rtcAdapterInstance)
     }
   
     setServerUrl(wsUrl) {
@@ -373,6 +382,7 @@ class WebRtcPeer {
     
         socket.on("connectSuccess", (data) => {
           const { joinedTime } = data;
+          NAF.connection.joinedTime = joinedTime; // useful to expose this to clients to make their own decisions, like spawning based on entry order
     
           self.myRoomJoinTime = joinedTime;
           NAF.log.write("Successfully joined room", self.room, "at server time", joinedTime);
@@ -407,7 +417,7 @@ class WebRtcPeer {
             });
           }
           else {
-            console.warn(`no audio/video`)
+            console.warn(`audio and video disabled`)
             self.connectSuccess(self.myId);
           }
         });
@@ -477,11 +487,12 @@ class WebRtcPeer {
         );
   
         self.peers[remoteId] = peer;
+
       }
   
       this.occupantListener(occupants);
     }
-  
+
     shouldStartConnectionTo(client) {
       console.log(`we ${(this.myRoomJoinTime || 0) <= (client || 0) ? "should" : "should not"} start a connection to ${client}`)
       console.log(this.myRoomJoinTime, client)
