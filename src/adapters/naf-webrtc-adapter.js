@@ -399,10 +399,10 @@ class WebRtcPeer {
             };
             navigator.mediaDevices.getUserMedia(mediaConstraints)
             .then(localStream => {
-              console.log("got local stream, storing", localStream)
+              console.log("got local stream, storing and sending", localStream)
               self.storeAVStream(self.myId, localStream);
               self.connectSuccess(self.myId);
-              console.log("adding local track to stream on socket connectsuccess, this is likely the failure", self)
+              console.warn("adding local track to stream on socket connectsuccess, this is likely the failure -debugging, will try after 25 second delay", self)
               setTimeout(() => {
                 console.error("ADDING DELAYED TRACKS - DEBUG ATTEMPT")
                 localStream.getTracks().forEach(
@@ -413,7 +413,7 @@ class WebRtcPeer {
                     })
                   }
                 )
-              }, 5000)
+              }, 25000)
             })
             .catch(e => {
               NAF.log.error(e);
