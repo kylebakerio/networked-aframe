@@ -4,7 +4,7 @@ console.error("USING CUSTOM EXPERIMENTAL NETWORKED AFRAME WEBRTC ADAPTER *1")
 console.error("USING CUSTOM EXPERIMENTAL NETWORKED AFRAME WEBRTC ADAPTER")
 console.error("USING CUSTOM EXPERIMENTAL NETWORKED AFRAME WEBRTC ADAPTER")
 console.error("USING CUSTOM EXPERIMENTAL NETWORKED AFRAME WEBRTC ADAPTER")
-console.log("try window.getMyrtcpc,  window.getRTCpeers, window.rtcAdapterInstance")
+console.log("try window.getRTCpeers, window.rtcAdapterInstance")
 
 
 class WebRtcPeer {
@@ -17,9 +17,6 @@ class WebRtcPeer {
   
       this.pc = this.createPeerConnection();
       this.channel = null;
-
-      //debugging
-      window.getMyrtcpc = function() { return this.pc }
     }
   
     setDatachannelListeners(openListener, closedListener, messageListener, trackListener) {
@@ -151,7 +148,11 @@ class WebRtcPeer {
   
       // Note: seems like channel.onclose hander is unreliable on some platforms,
       //       so also tries to detect disconnection here.
-      pc.oniceconnectionstatechange = function() {
+      pc.oniceconnectionstatechange = function(state) {
+        console.error("PEER CONNECTION STATE CHANGE", this.remoteId)
+        console.warn("if we're trying to stream the video before this is 'completed', it is very likely the cause of video problems.")
+        console.log(state, pc.iceConnectionState)
+        console.log('@', this.getServerTime())
         if (self.open && pc.iceConnectionState === "disconnected") {
           self.open = false;
           self.closedListener(self.remoteId);
