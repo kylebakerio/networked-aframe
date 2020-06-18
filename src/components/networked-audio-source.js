@@ -38,7 +38,7 @@ AFRAME.registerComponent('networked-audio-source', {
   },
 
   streamVideoToScreen(stream) {
-    console.error("ATTEMPTING STREAM TO SCREEN", stream)
+    console.warn("Success! Streaming received video to screen", stream)
     // experimental video support
 
     this.screen = document.getElementById('webrtc-screen');

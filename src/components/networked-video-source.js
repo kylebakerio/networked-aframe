@@ -14,7 +14,7 @@ AFRAME.registerComponent('networked-video-source', {
   },
 
   init: function () {
-    console.warn('init networked-video-source | THIS IS INCOMPLETE')
+    console.warn('init networked-video-source | THIS IS UNTESTED')
     this.listener = null;
     this.stream = null;
 
@@ -28,7 +28,7 @@ AFRAME.registerComponent('networked-video-source', {
           .then(stream => this._setMediaStream(stream, ownerId))
           .catch((e) => naf.log.error(`Error getting media stream for ${ownerId}`, e));
       } else {
-        console.warn("it's a local entity, not a networked one, so won't attach stream to it")
+        console.warn("it's a local entity, not one owned by someone else on the network, so won't attach stream to it")
         // Correctly configured local entity, perhaps do something here for enabling debug audio loopback
       }
     });
@@ -38,11 +38,12 @@ AFRAME.registerComponent('networked-video-source', {
     this._setPannerProperties();
   },
 
-  streamVideoToScreen(stream) {
-    console.error("ATTEMPTING STREAM TO SCREEN", stream)
+  streamVideoToScreen(stream, ownerId) {
+    console.error("ATTEMPTING STREAM TO SCREEN", ownerId, stream)
     // experimental video support
 
-    this.screen = document.getElementById('webrtc-screen');
+    // this.screen = document.getElementById('webrtc-screen');
+    this.screen = document.getElementById(`webrtc-screen-${ownerId}`);
     let screen = this.screen;
 
     /*
@@ -74,14 +75,17 @@ rightVideo.onresize = () => {
     }
   },
 
-  _setMediaStream(newStream) {
+  _setMediaStream(newStream, ownerId) {
     console.warn("SET MEDIA STREAM")
     if(!this.sound) {
       this.setupSound();
     }
     if (!this.videoEl) {
-      this.setupVideo();
+      this.setupVideo(ownerId);
     }
+    // EXPERIMENTAL VIDEO SUPPORT
+    console.error("ATTEMPTING VIDEO STREAM")
+    this.streamVideoToScreen(newStream, ownerId)
 
     if(newStream != this.stream) {
       if(this.stream) {
@@ -103,9 +107,7 @@ rightVideo.onresize = () => {
         this.sound.setNodeSource(soundSource);
         this.el.emit('sound-source-set', { soundSource });
 
-        // EXPERIMENTAL VIDEO SUPPORT
-        console.error("ATTEMPTING VIDEO STREAM")
-        this.streamVideoToScreen(newStream)
+        // should video stream go here...?
       }
       this.stream = newStream;
     }
@@ -131,7 +133,7 @@ rightVideo.onresize = () => {
 
   setupVideo: function(ownerId) {
     var video = document.createElement("video");
-    video.setAttribute("id", 'webrtc-screen-ownerId');
+    video.setAttribute("id", `webrtc-screen-${ownerId}`);
   },
 
   setupSound: function() {
