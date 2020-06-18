@@ -27,7 +27,8 @@ AFRAME.registerComponent('networked-video-source', {
         NAF.connection.adapter.getMediaStream(ownerId)
           .then(stream => this._setMediaStream(stream, ownerId))
           .catch((e) => naf.log.error(`Error getting media stream for ${ownerId}`, e));
-      } else {
+      }
+      else {
         console.warn("it's a local entity, not one owned by someone else on the network, so won't attach stream to it")
         // Correctly configured local entity, perhaps do something here for enabling debug audio loopback
       }
@@ -39,7 +40,7 @@ AFRAME.registerComponent('networked-video-source', {
   },
 
   streamVideoToScreen(stream, ownerId) {
-    console.error("ATTEMPTING STREAM TO SCREEN (both legacy and new style)", NAF.connection.getServerTime(), ownerId, stream)
+    console.error("Streaming Video To Screen! (both legacy and new style)", NAF.connection.getServerTime(), ownerId, stream)
     // experimental video support
 
     this.screen = document.getElementById('webrtc-screen');

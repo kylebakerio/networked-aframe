@@ -42,7 +42,7 @@ class WebRtcPeer {
       if (!this.haveAddedOwnStreamTracks && (options.sendAudio || options.sendVideo)) {
         options.localAVStream.getTracks().forEach(
           track => {
-            console.warn("ADDING LOCAL TRACK FOR OFFER", track, self.pc, "error here happens when we try to add our own track multiple times it seems...")
+            console.warn("ADDING LOCAL TRACK FOR OFFER", track, self.pc, "an error here happens when we try to add our own track multiple times it seems...")
 
             this.haveAddedOwnStreamTracks = true;
             return self.pc.addTrack(track, options.localAVStream)
@@ -148,11 +148,13 @@ class WebRtcPeer {
   
       // Note: seems like channel.onclose hander is unreliable on some platforms,
       //       so also tries to detect disconnection here.
-      pc.oniceconnectionstatechange = function(state) {
-        console.error("PEER CONNECTION STATE CHANGE", this.remoteId)
+      pc.oniceconnectionstatechange = function(event) {
+        console.error("PEER CONNECTION STATE CHANGE", pc.remoteId)
         console.warn("if we're trying to stream the video before this is 'completed', it is very likely the cause of video problems.")
-        console.log(state, pc.iceConnectionState)
         console.log('@', NAF.connection.getServerTime())
+        console.log(event.target.remoteId, event.target.iceConnectionState, pc.iceConnectionState)
+        console.log(pc === event.target)
+        // see https://rollout.io/blog/webrtc-issues-and-how-to-debug-them/
         
         if (self.open && pc.iceConnectionState === "disconnected") {
           self.open = false;
@@ -397,18 +399,21 @@ class WebRtcPeer {
             };
             navigator.mediaDevices.getUserMedia(mediaConstraints)
             .then(localStream => {
-              console.log("got local stream", localStream)
+              console.log("got local stream, storing", localStream)
               self.storeAVStream(self.myId, localStream);
               self.connectSuccess(self.myId);
               console.log("adding local track to stream on socket connectsuccess, this is likely the failure", self)
-              localStream.getTracks().forEach(
-                track => {
-                  Object.keys(self.peers).forEach(peerId => { 
-                    console.log("problem is likely here... addTrack to", peerId, track, localStream)
-                    self.peers[peerId].pc.addTrack(track, localStream) 
-                  })
-                }
-              )
+              setTimeout(() => {
+                console.error("ADDING DELAYED TRACKS - DEBUG ATTEMPT")
+                localStream.getTracks().forEach(
+                  track => {
+                    Object.keys(self.peers).forEach(peerId => { 
+                      console.log("problem is likely here... addTrack to", peerId, self.peers[peerId].pc.iceConnectionState, track, localStream)
+                      self.peers[peerId].pc.addTrack(track, localStream) 
+                    })
+                  }
+                )
+              }, 5000)
             })
             .catch(e => {
               NAF.log.error(e);
@@ -581,12 +586,12 @@ class WebRtcPeer {
     storeAVStream(clientId, stream) {
       this.avStreams[clientId] = stream;
       if (this.pendingStreamRequest[clientId]) {
-        NAF.log.write("Received pending audio + video for " + clientId + " resolving with it, should cause attachment to dom");
+        NAF.log.write("Received pending audio + video for " + clientId + " resolving with it, should cause attachment to go to DOM");
         this.pendingStreamRequest[clientId](stream);
         delete this.pendingStreamRequest[clientId](stream); // <-- calling the resolve a second time, as we delete the output of calling resolve....?
       }
       else {
-        console.warn("No pendingStreamRequest...", clientId, stream)
+        console.warn("No pendingStreamRequest... so will never resolve?", clientId, stream)
       }
     }
   
@@ -627,9 +632,10 @@ class WebRtcPeer {
       // during an offer
       const self = this;
       if (this.avStreams[clientId]) {
-        NAF.log.write("Already had audio/video for " + clientId + ", will attach it");
+        NAF.log.write("Already have audio/video for " (NAF.clientId === clientId ? "self" : clientId) + ", will resolve it");
         return Promise.resolve(this.avStreams[clientId]);
-      } else {
+      }
+      else {
         NAF.log.write("Waiting on audio/video for " + clientId + ", will promise it...");
         let waiting = setInterval(x=>console.log("...still waiting"), 7000);
         return new Promise(resolve => {
