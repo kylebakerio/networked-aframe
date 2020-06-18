@@ -632,7 +632,7 @@ class WebRtcPeer {
       // during an offer
       const self = this;
       if (this.avStreams[clientId]) {
-        NAF.log.write("Already have audio/video for " (NAF.clientId === clientId ? "self" : clientId) + ", will resolve it");
+        NAF.log.write("Already have audio/video for " + (NAF.clientId === clientId ? "self" : clientId) + ", will resolve it");
         return Promise.resolve(this.avStreams[clientId]);
       }
       else {
