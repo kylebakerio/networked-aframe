@@ -39,10 +39,10 @@ AFRAME.registerComponent('networked-video-source', {
   },
 
   streamVideoToScreen(stream, ownerId) {
-    console.error("ATTEMPTING STREAM TO SCREEN", ownerId, stream)
+    console.error("ATTEMPTING STREAM TO SCREEN (both legacy and new style)", ownerId, stream)
     // experimental video support
 
-    // this.screen = document.getElementById('webrtc-screen');
+    this.screen = document.getElementById('webrtc-screen');
     this.screen = document.getElementById(`webrtc-screen-${ownerId}`);
     let screen = this.screen;
 
