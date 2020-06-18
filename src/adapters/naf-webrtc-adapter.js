@@ -152,7 +152,8 @@ class WebRtcPeer {
         console.error("PEER CONNECTION STATE CHANGE", this.remoteId)
         console.warn("if we're trying to stream the video before this is 'completed', it is very likely the cause of video problems.")
         console.log(state, pc.iceConnectionState)
-        console.log('@', this.getServerTime())
+        console.log('@', NAF.connection.getServerTime())
+        
         if (self.open && pc.iceConnectionState === "disconnected") {
           self.open = false;
           self.closedListener(self.remoteId);
