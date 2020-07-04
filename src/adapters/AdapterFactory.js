@@ -18,24 +18,24 @@ class AdapterFactory {
   }
 
   register(adapterName, AdapterClass) {
+    console.warn("REGISTERING ADAPTER!", adapterName)
     this.adapters[adapterName] = AdapterClass;
   }
 
   make(adapterName) {
     var name = adapterName.toLowerCase();
-    if (name === 'easyrtc') {
-      console.warn("ATTEMPTING TO USE EXPERIMENTAL DEPRECATED OPENRTC ADAPTER")
-    }
     if (this.adapters[name]) {
       var AdapterClass = this.adapters[name];
       return new AdapterClass();
     } else if (name === 'easyrtc' || name == 'wseasyrtc') {
-      throw new Error(
-        "Adapter: " +
-          adapterName + 
-          " not registered. EasyRTC support was removed in Networked-Aframe 0.7.0." +
-          " To use the deprecated EasyRTC adapter see https://github.com/networked-aframe/naf-easyrtc-adapter"
-        );
+      console.warn("WILL ATTEMPT TO USE EXPERIMENTAL DEPRECATED -> FORKED OPENRTC ADAPTER")
+      // this.adapters["easyrtc"] = EasyRtcAdapter; // using register pattern above // <-- don't do that, need a different server, so need whole easyrtc repo not just the adapter -_-
+      // throw new Error(
+      //   "Adapter: " +
+      //     adapterName + 
+      //     " not registered. EasyRTC support was removed in Networked-Aframe 0.7.0." +
+      //     " To use the deprecated EasyRTC adapter see https://github.com/networked-aframe/naf-easyrtc-adapter"
+      //   );
     } else {
       throw new Error(
         "Adapter: " +
