@@ -7,6 +7,22 @@ Because I liked a lot about (the idea of) Networked A-Frame and needed to use it
 
 <i>showing phone camera and laptop webcame facing each other, from computer screen recording seeing a screen that displays phone video feed.</i>
 
+Current Status
+========
+
+I have tried to use this deployed with other people. While I can get this to work, sometimes two way, when connecting to a deployed domain with my computer and phone, even on separate VPN's... the three people I tested with were not able to connect with me over webrtc _at all_. I could watch my (messy, added, ad hoc) logs tells me the webrtc connection state goes from checking, to a long delay, to disconnected.
+
+For now, I'm temporarily switched to socket.io to get more core functionality working, and will get back to this (hopefully).
+
+The one-way video seems to be related to 'ontrack' on the peer connection not firing. It sometimes 'resolves itself' if the second user just repeatedly reconnects (less than 5 times), but I didn't get to exploring that deeply yet.
+
+My understanding of how NAF and the adapter and how webrtc has grown since I first wrote the below, and I began modifying the code to instead use a different pattern, following 'networked audio source' component--unfortunately, the networked video source component is not yet working. It should be close, but I just set it aside before finishing it and have been focused on other things.
+
+I don't mention it below, but in the new implementation, you have to have something with the 'networked-audio-source' component (I have been using the avatar) on it. (again, in future iterations, this would be the networked-video-source).
+
+Earlier Draft:
+===========
+
 As of this writing (see file update on github), I have this enabled. It's crude, but works either one way or, when lucky, both ways. You just set 'video' to 'true' on the scene properties (alongside where you can set 'audio:true' normally in NAF), so:
 
 ```js
@@ -69,7 +85,7 @@ To see your own webcam feed, add this to the scene:
 
 And that's it, the rest is all 'normal'. I have a bunch of messy console logs in there from me debugging and trying to figure out how the code worked as I hacked on it, those may help you if you're trying to improve it.
 
-My current project as of this writing is up on vrgo.herokuapp.com, will be moved to my own domain later at some point (used to be vrgo.kylebaker.io, and probably will be again later, but currently that's a client-side-only implementation from a few days ago; in the future, if this goes all the way, it will probably just get its own domain).
+My current project as of this writing is up on https://vrgo.club
 
 TO USE THIS FORK,
 
