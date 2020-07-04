@@ -1,11 +1,15 @@
 const WebrtcAdapter = require("./naf-webrtc-adapter");
+const EasyRtcAdapter = require("./naf-easyrtc-adapter");
 const SocketioAdapter = require('./naf-socketio-adapter');
+
+
 
 class AdapterFactory {
   constructor() {
     this.adapters = {
       "socketio": SocketioAdapter,
       "webrtc": WebrtcAdapter,
+      "easyrtc": EasyRtcAdapter, // can't add this way, it's made to be register()'d, not called here.
     };
 
     this.IS_CONNECTED = AdapterFactory.IS_CONNECTED;
@@ -19,6 +23,9 @@ class AdapterFactory {
 
   make(adapterName) {
     var name = adapterName.toLowerCase();
+    if (name === 'easyrtc') {
+      console.warn("ATTEMPTING TO USE EXPERIMENTAL DEPRECATED OPENRTC ADAPTER")
+    }
     if (this.adapters[name]) {
       var AdapterClass = this.adapters[name];
       return new AdapterClass();
